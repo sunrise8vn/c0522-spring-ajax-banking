@@ -1,6 +1,7 @@
 package com.cg.model;
 
 import com.cg.model.dto.CustomerCreateDTO;
+import com.cg.model.dto.CustomerDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -42,7 +43,7 @@ public class Customer extends BaseEntity {
     private BigDecimal balance;
 
 
-    @OneToMany
+    @OneToMany(targetEntity = Deposit.class, fetch = FetchType.EAGER)
     private List<Deposit> deposits;
 
 
@@ -60,6 +61,16 @@ public class Customer extends BaseEntity {
 
     public CustomerCreateDTO toCustomerCreateDTO() {
         return new CustomerCreateDTO()
+                .setId(id)
+                .setFullName(fullName)
+                .setEmail(email)
+                .setPhone(phone)
+                .setAddress(address)
+                .setBalance(balance.toString());
+    }
+
+    public CustomerDTO toCustomerDTO() {
+        return new CustomerDTO()
                 .setId(id)
                 .setFullName(fullName)
                 .setEmail(email)
