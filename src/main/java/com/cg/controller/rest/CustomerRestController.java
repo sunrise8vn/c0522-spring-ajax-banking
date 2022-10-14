@@ -3,9 +3,11 @@ package com.cg.controller.rest;
 
 import com.cg.model.Customer;
 import com.cg.model.Deposit;
+import com.cg.model.Withdraw;
 import com.cg.model.dto.CustomerCreateDTO;
 import com.cg.model.dto.CustomerDTO;
 import com.cg.model.dto.DepositDTO;
+import com.cg.model.dto.WithdrawDTO;
 import com.cg.service.customer.ICustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -78,6 +80,32 @@ public class CustomerRestController {
         deposit.setCustomer(customerOptional.get());
 
         Customer newCustomer = customerService.deposit(customerOptional.get(), deposit);
+
+        return new ResponseEntity<>(newCustomer.toCustomerDTO(), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/withdraw")
+    public ResponseEntity<CustomerDTO> create(@RequestBody WithdrawDTO withdrawDTO) {
+
+        long customerId = withdrawDTO.getCustomerId();
+
+        Optional<Customer> customerOptional = customerService.findById(customerId);
+
+        if (!customerOptional.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        BigDecimal transactionAmount = new BigDecimal(Long.parseLong(withdrawDTO.getTransactionAmount()));
+
+        if (customerOptional.get().getBalance().compareTo(transactionAmount) < 0){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        Withdraw withdraw = new Withdraw();
+        withdraw.setTransactionAmount(transactionAmount);
+        withdraw.setCustomer(customerOptional.get());
+
+        Customer newCustomer = customerService.withdraw(customerOptional.get(), withdraw);
 
         return new ResponseEntity<>(newCustomer.toCustomerDTO(), HttpStatus.CREATED);
     }

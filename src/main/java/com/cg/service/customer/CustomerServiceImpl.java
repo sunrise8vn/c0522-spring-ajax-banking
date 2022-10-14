@@ -4,9 +4,11 @@ package com.cg.service.customer;
 import com.cg.model.Customer;
 import com.cg.model.Deposit;
 import com.cg.model.Transfer;
+import com.cg.model.Withdraw;
 import com.cg.repository.CustomerRepository;
 import com.cg.repository.DepositRepository;
 import com.cg.repository.TransferRepository;
+import com.cg.repository.WithdrawRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,9 @@ public class CustomerServiceImpl implements ICustomerService {
 
     @Autowired
     private DepositRepository depositRepository;
+
+    @Autowired
+    private WithdrawRepository withdrawRepository;
 
     @Autowired
     private TransferRepository transferRepository;
@@ -71,6 +76,28 @@ public class CustomerServiceImpl implements ICustomerService {
             deposit.setId(0L);
             deposit.setCustomer(customer);
             depositRepository.save(deposit);
+
+            Optional<Customer> newCustomer = customerRepository.findById(customer.getId());
+
+            return newCustomer.get();
+        } catch (Exception e) {
+            e.printStackTrace();
+            customer.setBalance(currentBalance);
+            return customer;
+        }
+    }
+
+    @Override
+    public Customer withdraw(Customer customer, Withdraw withdraw) {
+        BigDecimal currentBalance = customer.getBalance();
+        BigDecimal transactionAmount = withdraw.getTransactionAmount();
+
+        try {
+            customerRepository.reduceBalance(transactionAmount, customer.getId());
+
+            withdraw.setId(0L);
+            withdraw.setCustomer(customer);
+            withdrawRepository.save(withdraw);
 
             Optional<Customer> newCustomer = customerRepository.findById(customer.getId());
 

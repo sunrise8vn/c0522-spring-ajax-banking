@@ -1,5 +1,10 @@
 package com.cg.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -7,8 +12,13 @@ import javax.persistence.*;
 import java.math.BigDecimal;
 
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 @Entity
 @Table(name = "deposits")
+@Accessors(chain = true)
 public class Deposit extends BaseEntity implements Validator {
 
     @Id
@@ -21,39 +31,6 @@ public class Deposit extends BaseEntity implements Validator {
 
     @Column(name = "transaction_amount", precision = 12, scale = 0, nullable = false)
     private BigDecimal transactionAmount;
-
-    public Deposit() {
-    }
-
-    public Deposit(long id, Customer customer, BigDecimal transactionAmount) {
-        this.id = id;
-        this.customer = customer;
-        this.transactionAmount = transactionAmount;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public Customer getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
-    }
-
-    public BigDecimal getTransactionAmount() {
-        return transactionAmount;
-    }
-
-    public void setTransactionAmount(BigDecimal transactionAmount) {
-        this.transactionAmount = transactionAmount;
-    }
 
     @Override
     public boolean supports(Class<?> aClass) {
