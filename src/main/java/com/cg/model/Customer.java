@@ -2,6 +2,7 @@ package com.cg.model;
 
 import com.cg.model.dto.CustomerCreateDTO;
 import com.cg.model.dto.CustomerDTO;
+import com.cg.model.dto.RecipientDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -77,6 +78,12 @@ public class Customer extends BaseEntity {
                 .setPhone(phone)
                 .setAddress(address)
                 .setBalance(balance.toString());
+    }
+
+    public RecipientDTO toRecipientDTO() {
+        return new RecipientDTO()
+                .setId(id)
+                .setFullName(fullName);
     }
 
 }

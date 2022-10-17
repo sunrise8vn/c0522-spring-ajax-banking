@@ -1,22 +1,23 @@
 package com.cg.controller.rest;
 
 
+import com.cg.exception.DataInputException;
 import com.cg.model.Customer;
 import com.cg.model.Deposit;
+import com.cg.model.Transfer;
 import com.cg.model.Withdraw;
-import com.cg.model.dto.CustomerCreateDTO;
-import com.cg.model.dto.CustomerDTO;
-import com.cg.model.dto.DepositDTO;
-import com.cg.model.dto.WithdrawDTO;
+import com.cg.model.dto.*;
 import com.cg.service.customer.ICustomerService;
+import com.cg.util.AppUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 @RestController
@@ -24,12 +25,15 @@ import java.util.Optional;
 public class CustomerRestController {
 
     @Autowired
+    private AppUtil appUtil;
+
+    @Autowired
     private ICustomerService customerService;
 
     @GetMapping
-    public ResponseEntity<List<Customer>> getAll() {
+    public ResponseEntity<List<Customer>> findAllByDeletedIsFalse() {
 
-        List<Customer> customers = customerService.findAll();
+        List<Customer> customers = customerService.findAllByDeletedIsFalse();
 
 
         return new ResponseEntity<>(customers, HttpStatus.OK);
@@ -49,6 +53,29 @@ public class CustomerRestController {
         return new ResponseEntity<>(customer, HttpStatus.OK);
     }
 
+    @GetMapping("/get-all-recipients-without-sender/{senderId}")
+    public ResponseEntity<?> getAllRecipientsWithoutSender(@PathVariable long senderId) {
+
+        Optional<Customer> senderOptional = customerService.findById(senderId);
+
+        if (!senderOptional.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+//        List<Customer> recipients = customerService.getAllByIdNot(senderId);
+//
+//        List<RecipientDTO> recipientDTOS = new ArrayList<>();
+//
+//        for (Customer item : recipients) {
+//            recipientDTOS.add(item.toRecipientDTO());
+//        }
+
+        List<RecipientDTO> recipientDTOS = customerService.getAllRecipientDTO(senderId);
+
+
+        return new ResponseEntity<>(recipientDTOS, HttpStatus.OK);
+    }
+
     @PostMapping("/create")
     public ResponseEntity<CustomerCreateDTO> create(@RequestBody CustomerCreateDTO customerDTO) {
 
@@ -64,7 +91,7 @@ public class CustomerRestController {
     }
 
     @PostMapping("/deposit")
-    public ResponseEntity<CustomerDTO> create(@RequestBody DepositDTO depositDTO) {
+    public ResponseEntity<CustomerDTO> deposit(@RequestBody DepositDTO depositDTO) {
 
         long customerId = depositDTO.getCustomerId();
 
@@ -85,7 +112,7 @@ public class CustomerRestController {
     }
 
     @PostMapping("/withdraw")
-    public ResponseEntity<CustomerDTO> create(@RequestBody WithdrawDTO withdrawDTO) {
+    public ResponseEntity<CustomerDTO> withdraw(@RequestBody WithdrawDTO withdrawDTO) {
 
         long customerId = withdrawDTO.getCustomerId();
 
@@ -108,5 +135,82 @@ public class CustomerRestController {
         Customer newCustomer = customerService.withdraw(customerOptional.get(), withdraw);
 
         return new ResponseEntity<>(newCustomer.toCustomerDTO(), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/transfer")
+    public ResponseEntity<?> transfer(@Validated @RequestBody TransferDTO transferDTO, BindingResult bindingResult) {
+
+        new TransferDTO().validate(transferDTO, bindingResult);
+
+        if (bindingResult.hasFieldErrors()) {
+            return appUtil.mapErrorToResponse(bindingResult);
+        }
+
+        Optional<Customer> senderOptional = customerService.findById(transferDTO.getSenderId());
+
+        if (!senderOptional.isPresent()) {
+            throw new DataInputException("Thông tin người gửi không hợp lệ");
+        }
+
+        Optional<Customer> recipientOptional = customerService.findById(transferDTO.getRecipientId());
+
+        if (!recipientOptional.isPresent()) {
+            throw new DataInputException("Thông tin người nhận không hợp lệ");
+        }
+
+        Customer sender = senderOptional.get();
+
+        BigDecimal currentBalanceSender = sender.getBalance();
+
+        String transferAmountStr = transferDTO.getTransferAmount();
+        BigDecimal transferAmount = new BigDecimal(Long.parseLong(transferAmountStr));
+        long fees = 10;
+        BigDecimal feesAmount = transferAmount.multiply(new BigDecimal(fees)).divide(new BigDecimal(100L));
+        BigDecimal transactionAmount = transferAmount.add(feesAmount);
+
+        if (currentBalanceSender.compareTo(transactionAmount) < 0) {
+            throw new DataInputException("SỐ dư người gửi không đủ thực hiện giao dịch");
+        }
+
+        try {
+            Transfer transfer = new Transfer();
+            transfer.setId(0L);
+            transfer.setSender(sender);
+            transfer.setRecipient(recipientOptional.get());
+            transfer.setTransferAmount(transferAmount);
+            transfer.setFees(fees);
+            transfer.setFeesAmount(feesAmount);
+            transfer.setTransactionAmount(transactionAmount);
+
+            Customer newSender = customerService.transfer(transfer);
+
+            Optional<Customer> newRecipient = customerService.findById(transferDTO.getRecipientId());
+
+            Map<String, CustomerDTO> results = new HashMap<>();
+            results.put("sender", newSender.toCustomerDTO());
+            results.put("recipient", newRecipient.get().toCustomerDTO());
+
+            return new ResponseEntity<>(results, HttpStatus.CREATED);
+        } catch (Exception e) {
+            throw new DataInputException("Vui lòng liên hệ Administrator");
+        }
+    }
+
+    @DeleteMapping("/delete/{customerId}")
+    public ResponseEntity<CustomerDTO> delete(@PathVariable long customerId) {
+
+        Optional<Customer> customerOptional = customerService.findById(customerId);
+
+        if (!customerOptional.isPresent()) {
+            throw new DataInputException("Thông tin khách hàng cần xóa không hợp lệ");
+        }
+
+        try {
+            customerService.softDelete(customerId);
+            return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new DataInputException("Vui lòng liên hệ Administrator");
+        }
     }
 }

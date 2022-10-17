@@ -1,5 +1,7 @@
 package com.cg.model;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -8,6 +10,8 @@ import javax.persistence.MappedSuperclass;
 import java.util.Date;
 
 
+@Getter
+@Setter
 @MappedSuperclass
 public abstract class BaseEntity {
 
@@ -26,45 +30,5 @@ public abstract class BaseEntity {
     private long updatedBy;
 
     @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private Boolean deleted;
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public long getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(long createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public long getUpdatedBy() {
-        return updatedBy;
-    }
-
-    public void setUpdatedBy(long updatedBy) {
-        this.updatedBy = updatedBy;
-    }
-
-    public Boolean getDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(Boolean deleted) {
-        this.deleted = deleted;
-    }
+    private Boolean deleted = false;
 }

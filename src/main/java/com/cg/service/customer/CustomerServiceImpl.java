@@ -5,6 +5,7 @@ import com.cg.model.Customer;
 import com.cg.model.Deposit;
 import com.cg.model.Transfer;
 import com.cg.model.Withdraw;
+import com.cg.model.dto.RecipientDTO;
 import com.cg.repository.CustomerRepository;
 import com.cg.repository.DepositRepository;
 import com.cg.repository.TransferRepository;
@@ -35,6 +36,10 @@ public class CustomerServiceImpl implements ICustomerService {
     @Autowired
     private TransferRepository transferRepository;
 
+    @Override
+    public List<Customer> findAllByDeletedIsFalse() {
+        return customerRepository.findAllByDeletedIsFalse();
+    }
 
     @Override
     public List<Customer> findAll() {
@@ -59,6 +64,16 @@ public class CustomerServiceImpl implements ICustomerService {
     @Override
     public Boolean existsByIdEquals(long id) {
         return customerRepository.existsById(id);
+    }
+
+    @Override
+    public List<Customer> getAllByIdNot(long senderId) {
+        return customerRepository.getAllByIdNot(senderId);
+    }
+
+    @Override
+    public List<RecipientDTO> getAllRecipientDTO(long senderId) {
+        return customerRepository.getAllRecipientDTO(senderId);
     }
 
     @Override
@@ -111,7 +126,7 @@ public class CustomerServiceImpl implements ICustomerService {
 
     @Override
     public Customer transfer(Transfer transfer) {
-        Customer sender = transfer.getSender();
+//        Customer sender = transfer.getSender();
 //        sender.setBalance(sender.getBalance().subtract(transfer.getTransactionAmount()));
 //        Customer newSender = customerRepository.save(sender);
 
@@ -138,5 +153,10 @@ public class CustomerServiceImpl implements ICustomerService {
     @Override
     public void remove(Long id) {
 
+    }
+
+    @Override
+    public void softDelete(long customerId) {
+        customerRepository.softDelete(customerId);
     }
 }
