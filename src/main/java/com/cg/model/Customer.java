@@ -12,6 +12,7 @@ import lombok.experimental.Accessors;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 
 @NoArgsConstructor
@@ -44,8 +45,17 @@ public class Customer extends BaseEntity {
     private BigDecimal balance;
 
 
-    @OneToMany(targetEntity = Deposit.class, fetch = FetchType.EAGER)
-    private List<Deposit> deposits;
+    @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER)
+    private Set<Deposit> deposits;
+
+    @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER)
+    private Set<Withdraw> withdraws;
+
+    @OneToMany(mappedBy = "sender", fetch = FetchType.EAGER)
+    private Set<Transfer> senders;
+
+    @OneToMany(mappedBy = "recipient", fetch = FetchType.EAGER)
+    private Set<Transfer> recipients;
 
 
     @Override

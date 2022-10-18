@@ -4,6 +4,8 @@ import com.cg.model.Customer;
 import com.cg.model.Deposit;
 import com.cg.model.Transfer;
 import com.cg.model.Withdraw;
+import com.cg.model.dto.CustomerDTO;
+import com.cg.model.dto.ICustomerDTO;
 import com.cg.model.dto.RecipientDTO;
 import com.cg.service.IGeneralService;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +15,8 @@ import java.util.List;
 public interface ICustomerService extends IGeneralService<Customer> {
 
     List<Customer> findAllByDeletedIsFalse();
+
+    List<ICustomerDTO> getAllICustomerDTOByDeletedIsFalse();
 
     List<Customer> findAllByIdNot(long id);
 

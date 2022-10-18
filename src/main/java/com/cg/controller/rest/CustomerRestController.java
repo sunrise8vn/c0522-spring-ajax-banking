@@ -31,10 +31,9 @@ public class CustomerRestController {
     private ICustomerService customerService;
 
     @GetMapping
-    public ResponseEntity<List<Customer>> findAllByDeletedIsFalse() {
+    public ResponseEntity<?> findAllByDeletedIsFalse() {
 
-        List<Customer> customers = customerService.findAllByDeletedIsFalse();
-
+        List<ICustomerDTO> customers = customerService.getAllICustomerDTOByDeletedIsFalse();
 
         return new ResponseEntity<>(customers, HttpStatus.OK);
     }

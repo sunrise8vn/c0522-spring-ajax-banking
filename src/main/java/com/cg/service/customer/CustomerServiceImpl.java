@@ -5,6 +5,8 @@ import com.cg.model.Customer;
 import com.cg.model.Deposit;
 import com.cg.model.Transfer;
 import com.cg.model.Withdraw;
+import com.cg.model.dto.CustomerDTO;
+import com.cg.model.dto.ICustomerDTO;
 import com.cg.model.dto.RecipientDTO;
 import com.cg.repository.CustomerRepository;
 import com.cg.repository.DepositRepository;
@@ -39,6 +41,12 @@ public class CustomerServiceImpl implements ICustomerService {
     @Override
     public List<Customer> findAllByDeletedIsFalse() {
         return customerRepository.findAllByDeletedIsFalse();
+    }
+
+
+    @Override
+    public List<ICustomerDTO> getAllICustomerDTOByDeletedIsFalse() {
+        return customerRepository.getAllICustomerDTOByDeletedIsFalse();
     }
 
     @Override

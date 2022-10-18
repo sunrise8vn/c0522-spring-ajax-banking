@@ -2,6 +2,7 @@ package com.cg.service.transfer;
 
 
 import com.cg.model.Transfer;
+import com.cg.model.dto.TransferHistoryDTO;
 import com.cg.repository.TransferRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,11 @@ public class TransferServiceImpl implements ITransferService {
     @Override
     public List<Transfer> findAll() {
         return transferRepository.findAll();
+    }
+
+    @Override
+    public List<TransferHistoryDTO> getAllHistories() {
+        return transferRepository.getAllHistories();
     }
 
     @Override

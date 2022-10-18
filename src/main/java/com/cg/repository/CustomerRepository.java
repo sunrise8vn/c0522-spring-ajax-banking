@@ -2,6 +2,8 @@ package com.cg.repository;
 
 
 import com.cg.model.Customer;
+import com.cg.model.dto.CustomerDTO;
+import com.cg.model.dto.ICustomerDTO;
 import com.cg.model.dto.RecipientDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -17,6 +19,19 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     List<Customer> findAllByDeletedIsFalse();
 
+
+    @Query("SELECT " +
+                "c.id AS id, " +
+                "c.fullName AS fullName, " +
+                "c.email AS email, " +
+                "c.phone AS phone, " +
+                "c.address AS address, " +
+                "c.balance AS balance " +
+            "FROM Customer AS c " +
+            "WHERE c.deleted = false "
+    )
+    List<ICustomerDTO> getAllICustomerDTOByDeletedIsFalse();
+
     List<Customer> findAllByIdNot(long id);
 
     Boolean existsByIdEquals(long id);
@@ -28,7 +43,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
                 "c.fullName" +
             ") " +
             "FROM Customer AS c " +
-            "WHERE c.id <> :senderId "
+            "WHERE c.id <> :senderId " +
+            "AND c.deleted = false "
     )
     List<RecipientDTO> getAllRecipientDTO(@Param("senderId") long senderId);
 
